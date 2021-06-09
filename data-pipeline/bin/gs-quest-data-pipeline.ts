@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
-import { GsQuestDataPipelineStack } from '../lib/gs-quest-stack-data-pipeline';
+import { GsQuestDataPipelineStack } from '../lib/gs-quest-data-pipeline-stack';
 
 const app = new cdk.App();
 new GsQuestDataPipelineStack(app, 'GsQuestDataPipelineStack', {
