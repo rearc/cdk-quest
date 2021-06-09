@@ -23,6 +23,8 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
     const s3Bucket = this.setupS3Buckets()
    
     s3Bucket.glue.grantRead(glueRole);
+    s3Bucket.vendor.grantRead(glueRole);
+    s3Bucket.data.grantReadWrite(glueRole);
 
     new s3Deployment.BucketDeployment(this, 'DeployGlueJobFiles', {
       sources: [s3Deployment.Source.asset('./src/glue')],
