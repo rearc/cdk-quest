@@ -19,47 +19,59 @@ print('vendor_bucket_name: %s' % vendor_bucket_name)
 data_bucket_name = args['data_bucket_name']
 print('data_bucket_name: %s' % data_bucket_name)
 
-# Receive message from SQS queue
-response = sqs.receive_message(
-  QueueUrl=queue_url,
-  AttributeNames=[
-    'vendorName',
-    'fileName'
-  ],
-  MaxNumberOfMessages=1, # Should we receive more messages?
-  MessageAttributeNames=[
-    'All'
-  ],
-  VisibilityTimeout=5,
-  WaitTimeSeconds=0
-)
+def retrieve_messages():
+  response = sqs.receive_message(
+    QueueUrl=queue_url,
+    AttributeNames=[
+      'vendorName',
+      'fileName'
+    ],
+    MaxNumberOfMessages=10,
+    MessageAttributeNames=[
+      'All'
+    ],
+    VisibilityTimeout=5,
+    WaitTimeSeconds=0
+  )
 
-message = response['Messages'][0]
-print('Full Message: %s' % message)
-print('Message Body: %s' % message['Body'])
-print('Message Attributes: %s' % message['MessageAttributes'])
+  if hasattr(response, 'Messages'):
+    return response['Messages']
+  else:
+    return []
 
-receipt_handle = message['ReceiptHandle']
+# Receive a batch of messages from the SQS queue
+messages = retrieve_messages()
 
-# Strip vendor name for message attributes
-vendor_name = message['MessageAttributes']['vendorName']['StringValue']
-print('vendor_name: %s' % vendor_name)
+while len(messages) > 0:
+  for message in messages:
+    print('Full Message: %s' % message)
+    print('Message Body: %s' % message['Body'])
+    print('Message Attributes: %s' % message['MessageAttributes'])
 
-# Strip file name for message attributes
-file_name = message['MessageAttributes']['fileName']['StringValue']
-print('file_name: %s' % file_name)
+    receipt_handle = message['ReceiptHandle']
 
-# Copy vendor file to data file
-copy_source = {
-  'Bucket': vendor_bucket_name,
-  'Key': vendor_name + '/' + file_name
-}
-bucket = s3.Bucket(data_bucket_name)
-bucket.copy(copy_source, vendor_name + '-' + file_name)
-print('Successfully copied message from the vendor bucket to the data bucket')
+    # Strip vendor name for message attributes
+    vendor_name = message['MessageAttributes']['vendorName']['StringValue']
+    print('vendor_name: %s' % vendor_name)
 
-sqs.delete_message(
-  QueueUrl=queue_url,
-  ReceiptHandle=receipt_handle
-)
-print('Successfully deleted message')
+    # Strip file name for message attributes
+    file_name = message['MessageAttributes']['fileName']['StringValue']
+    print('file_name: %s' % file_name)
+
+    # Copy vendor file to data file
+    copy_source = {
+      'Bucket': vendor_bucket_name,
+      'Key': vendor_name + '/' + file_name
+    }
+    bucket = s3.Bucket(data_bucket_name)
+    bucket.copy(copy_source, vendor_name + '-' + file_name)
+    print('Successfully copied message from the vendor bucket to the data bucket')
+
+    sqs.delete_message(
+      QueueUrl=queue_url,
+      ReceiptHandle=receipt_handle
+    )
+    print('Successfully deleted message')
+
+    # Receive the next batch of messages from the SQS queue
+    messages = retrieve_messages()
