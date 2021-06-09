@@ -1,9 +1,23 @@
 import boto3
+import sys
+from awsglue.utils import getResolvedOptions
 
 s3 = boto3.resource('s3')
 sqs = boto3.client('sqs')
 
-queue_url = 'https://sqs.us-east-1.amazonaws.com/209490147253/GsQuestDataPipelineStack-gsquestdatapipelinequeue24B34FEE-F5TF0P2LKRRR.fifo' # Todo: Parameterize this
+args = getResolvedOptions(sys.argv,
+                          ['queue_url',
+                           'vendor_bucket_name',
+                           'data_bucket_name'])
+
+queue_url = args['queue_url']
+print('queue_url: %s' % queue_url)
+
+vendor_bucket_name = args['vendor_bucket_name']
+print('vendor_bucket_name: %s' % vendor_bucket_name)
+
+data_bucket_name = args['data_bucket_name']
+print('data_bucket_name: %s' % data_bucket_name)
 
 # Receive message from SQS queue
 response = sqs.receive_message(
@@ -21,25 +35,28 @@ response = sqs.receive_message(
 )
 
 message = response['Messages'][0]
-print('Successfully retrieved file: %s' % message)
+print('Full Message: %s' % message)
 print('Message Body: %s' % message['Body'])
 print('Message Attributes: %s' % message['MessageAttributes'])
 
-vendorName = message['MessageAttributes']['vendorName']['StringValue']
-print('VendorName: %s' % vendorName)
-
-fileName = message['MessageAttributes']['fileName']['StringValue']
-print('FileName: %s' % fileName)
-
-copy_source = {
-  'Bucket': 'gs-quest-data-pipeline-vendor-bucket', # Todo: Parameterize this
-  'Key': vendorName + '/' + fileName
-}
-bucket = s3.Bucket('gs-quest-data-pipeline-data-bucket') # Todo: Parameterize this
-bucket.copy(copy_source, vendorName + '-' + fileName)
-print('Successfully copied message from the vendor bucket to the data bucket')
-
 receipt_handle = message['ReceiptHandle']
+
+# Strip vendor name for message attributes
+vendor_name = message['MessageAttributes']['vendorName']['StringValue']
+print('vendor_name: %s' % vendor_name)
+
+# Strip file name for message attributes
+file_name = message['MessageAttributes']['fileName']['StringValue']
+print('file_name: %s' % file_name)
+
+# Copy vendor file to data file
+copy_source = {
+  'Bucket': vendor_bucket_name,
+  'Key': vendor_name + '/' + file_name
+}
+bucket = s3.Bucket(data_bucket_name)
+bucket.copy(copy_source, vendor_name + '-' + file_name)
+print('Successfully copied message from the vendor bucket to the data bucket')
 
 sqs.delete_message(
   QueueUrl=queue_url,

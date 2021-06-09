@@ -32,21 +32,26 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
       destinationKeyPrefix: 'scripts'
     });
 
-    const glueJob = new glue.CfnJob(this, `${this.resourceName}-job`, {
-      role: glueRole.roleArn,
-      command: {
-        name: 'pythonshell',
-        pythonVersion: '3',
-        scriptLocation: `s3://${s3Bucket.glue.bucketName}/scripts/consumer.py`
-      }
-    });
-
     const queue = new sqs.Queue(this, `${this.resourceName}-queue`, {
       fifo: true,
       contentBasedDeduplication: true
     });
 
     queue.grantConsumeMessages(glueRole)
+
+    new glue.CfnJob(this, `${this.resourceName}-job`, {
+      role: glueRole.roleArn,
+      command: {
+        name: 'pythonshell',
+        pythonVersion: '3',
+        scriptLocation: `s3://${s3Bucket.glue.bucketName}/scripts/consumer.py`
+      },
+      defaultArguments: {
+        '--queue_url': queue.queueUrl,
+        '--vendor_bucket_name': s3Bucket.vendor.bucketName,
+        '--data_bucket_name': s3Bucket.data.bucketName
+      }
+    });
   }
 
   setupIAMGlueRole(): iam.Role {
