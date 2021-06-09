@@ -1,8 +1,8 @@
 {
-  "name": "gs-quest",
+  "name": "gs-quest-data-pipeline",
   "version": "0.1.0",
   "bin": {
-    "gs-quest": "bin/gs-quest.js"
+    "gs-quest-data-pipeline": "bin/gs-quest-data-pipeline.js"
   },
   "scripts": {
     "build": "tsc",

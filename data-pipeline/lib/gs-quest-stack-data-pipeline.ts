@@ -12,7 +12,7 @@ interface S3Bucket {
   data: s3.Bucket;
 }
 
-export class GsQuestStack extends cdk.Stack {
+export class GsQuestDataPipelineStack extends cdk.Stack {
   private readonly resourceName: string = 'gs-quest-data-pipeline'
 
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
