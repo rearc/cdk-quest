@@ -18,9 +18,9 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const glueRole = this.setupIAMGlueRole()
+    const glueRole = this.setupIAMGlueRole();
 
-    const s3Bucket = this.setupS3Buckets()
+    const s3Bucket = this.setupS3Buckets();
    
     s3Bucket.glue.grantRead(glueRole);
     s3Bucket.vendor.grantRead(glueRole);
@@ -42,8 +42,10 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
     });
 
     const queue = new sqs.Queue(this, `${this.resourceName}-queue`, {
-      visibilityTimeout: cdk.Duration.hours(12)
+      fifo: true
     });
+
+    queue.grantConsumeMessages(glueRole)
   }
 
   setupIAMGlueRole(): iam.Role {
@@ -52,7 +54,7 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
     });
     
     const gluePolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole");
-    glueRole.addManagedPolicy(gluePolicy)
+    glueRole.addManagedPolicy(gluePolicy);
 
     return glueRole
   }
