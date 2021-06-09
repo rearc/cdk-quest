@@ -1,10 +1,10 @@
-# Welcome to your CDK TypeScript project!
+# GS Quest
 
-This is a blank project for TypeScript development with CDK.
+## Data Pipeline
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+Contains the core data pipeline resource setup in AWS which includes Glue, SQS and S3 Buckets.
 
-## Useful commands
+### Useful commands
 
  * `npm run build`   compile typescript to js
  * `npm run watch`   watch for changes and compile
