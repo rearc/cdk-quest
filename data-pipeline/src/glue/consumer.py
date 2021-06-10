@@ -1,5 +1,6 @@
 import boto3
 import sys
+import time
 from awsglue.utils import getResolvedOptions
 
 s3 = boto3.resource('s3')
@@ -18,6 +19,9 @@ print('vendor_bucket_name: %s' % vendor_bucket_name)
 
 data_bucket_name = args['data_bucket_name']
 print('data_bucket_name: %s' % data_bucket_name)
+
+def current_time():
+    return round(time.time() * 1000)
 
 def retrieve_messages():
   response = sqs.receive_message(
@@ -66,7 +70,7 @@ while len(messages) > 0:
       'Key': vendor_name + '/' + file_name
     }
     bucket = s3.Bucket(data_bucket_name)
-    bucket.copy(copy_source, vendor_name + '-' + file_name)
+    bucket.copy(copy_source, "{timestamp}-{vendor}-{file}".format(timestamp = current_time(), vendor = vendor_name, file = file_name))
     print('Successfully copied message from the vendor bucket to the data bucket')
 
     sqs.delete_message(
