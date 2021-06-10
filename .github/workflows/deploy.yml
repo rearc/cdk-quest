@@ -9,7 +9,7 @@ on:
       - README.md
 
 jobs:
-  deploy:
+  data-pipeline:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,7 +28,11 @@ jobs:
           node-version: 16.x
 
       - name: Install
-        run: npm install
+        run: |
+          cd data-pipeline
+          npm install
 
       - name: Deploy
-        run: npm run cdk deploy --require-approval=never
+        run: |
+          cd data-pipeline
+          npm run cdk deploy --require-approval=never
