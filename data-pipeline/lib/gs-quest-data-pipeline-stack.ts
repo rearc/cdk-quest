@@ -13,14 +13,17 @@ interface S3Bucket {
 }
 
 export class GsQuestDataPipelineStack extends cdk.Stack {
-  private readonly resourceName: string = 'gs-quest-data-pipeline'
-
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const bucketNamePrefix = new cdk.CfnParameter(this, "bucketNamePrefix", {
+      type: "String",
+      description: "The prefix to use for all s3 buckets created in this stack."
+    });
+
     const glueRole = this.setupIAMGlueRole();
 
-    const s3Bucket = this.setupS3Buckets();
+    const s3Bucket = this.setupS3Buckets(bucketNamePrefix.valueAsString);
 
     s3Bucket.glue.grantRead(glueRole);
     s3Bucket.vendor.grantRead(glueRole);
@@ -32,14 +35,14 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
       destinationKeyPrefix: 'scripts'
     });
 
-    const queue = new sqs.Queue(this, `${this.resourceName}-queue`, {
+    const queue = new sqs.Queue(this, 'GsQuestDataPipelineQueue', {
       fifo: true,
       contentBasedDeduplication: true
     });
 
     queue.grantConsumeMessages(glueRole)
 
-    new glue.CfnJob(this, `${this.resourceName}-job`, {
+    new glue.CfnJob(this, 'GsQuestDataPipelineGlueJob', {
       role: glueRole.roleArn,
       command: {
         name: 'pythonshell',
@@ -55,7 +58,7 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
   }
 
   setupIAMGlueRole(): iam.Role {
-    const glueRole = new iam.Role(this, `${this.resourceName}-role`, {
+    const glueRole = new iam.Role(this, 'GsQuestDataPipelineRole', {
       assumedBy: new iam.ServicePrincipal('glue.amazonaws.com'),
     });
 
@@ -65,24 +68,24 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
     return glueRole
   }
 
-  setupS3Buckets(): S3Bucket {
+  setupS3Buckets(bucketNamePrefix: string): S3Bucket {
     const glue = new s3.Bucket(this, 'GlueBucket', {
       versioned: true,
-      bucketName: `${this.resourceName}-glue-bucket`,
+      bucketName: `${bucketNamePrefix}-glue-bucket`,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     });
 
     const vendor = new s3.Bucket(this, 'VendorBucket', {
       versioned: true,
-      bucketName: `${this.resourceName}-vendor-bucket`,
+      bucketName: `${bucketNamePrefix}-vendor-bucket`,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     });
 
     const data = new s3.Bucket(this, 'DataBucket', {
       versioned: true,
-      bucketName: `${this.resourceName}-data-bucket`,
+      bucketName: `${bucketNamePrefix}-data-bucket`,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
     });

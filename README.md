@@ -9,8 +9,8 @@ Contains the core data pipeline resource setup in AWS which includes Glue, SQS a
 ### CDK Setup
 From the [data-pipeline/](data-pipeline/) directory, run the following commands:
 ```
-npm install
-npm run cdk deploy
+npm install -g cdk
+cdk deploy --parameters bucketNamePrefix=<prefix>
 ```
 
 If the aws account you're deploy to was never boostrapped before, run the following command before deploying:
