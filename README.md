@@ -2,13 +2,24 @@
 
 ## Data Pipeline
 
-Contains the core data pipeline resource setup in AWS which includes Glue, SQS and S3 Buckets.
+Contains the core data pipeline resource setup in AWS which includes Glue, SQS and various S3 Buckets.
 
-### Useful commands
+![Architecture](docs/ARCH.png)
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+### CDK Setup
+From the [data-pipeline/](data-pipeline/) directory, run the following commands:
+```
+npm install
+npm run cdk deploy
+```
+
+If the aws account you're deploy to was never boostrapped before, run the following command before deploying:
+```
+npm run cdk bootstrap aws://<account-id>/us-east-1
+```
+
+### Demo Scripts
+Examples are located in the [scripts/](scripts/) directory. The following command can be used for uploading a file to the data pipeline (replacing parameters with actual resource names/urls):
+```
+sh uploadFile.sh test-vendor test-vendor-bucket https://sqs.us-east-1.amazonaws.com/1234567890/test-vendor-queue.fifo
+```
