@@ -33,10 +33,12 @@ def retrieve_messages():
     VisibilityTimeout=5,
     WaitTimeSeconds=0
   )
+  print('response: %s' % response)
 
-  if hasattr(response, 'Messages'):
+  if 'Messages' in response:
     return response['Messages']
   else:
+    print('Finished receiving all messages from SQS')
     return []
 
 # Receive a batch of messages from the SQS queue
@@ -73,5 +75,5 @@ while len(messages) > 0:
     )
     print('Successfully deleted message')
 
-    # Receive the next batch of messages from the SQS queue
-    messages = retrieve_messages()
+  # Receive the next batch of messages from the SQS queue
+  messages = retrieve_messages()
