@@ -15,7 +15,7 @@ echo "Creating temp file: $fileName"
 openssl rand -base64 200 -out $fileName
 
 echo "Uploading file to s3://$vendorBucket/$vendorName/$fileName"
-aws s3 cp $fileName s3://$vendorBucket/$vendorName/$fileName
+aws s3 cp $fileName s3://$vendorBucket/$vendorName/$fileName --acl bucket-owner-full-control
 
 echo "Deleting temp file"
 rm $fileName

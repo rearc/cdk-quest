@@ -88,21 +88,24 @@ export class QuestDataPipelineStack extends cdk.Stack {
       versioned: true,
       bucketName: `${bucketNamePrefix}-glue-bucket`,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED
     });
 
     const vendor = new s3.Bucket(this, 'VendorBucket', {
       versioned: true,
       bucketName: `${bucketNamePrefix}-vendor-bucket`,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED
     });
 
     const data = new s3.Bucket(this, 'DataBucket', {
       versioned: true,
       bucketName: `${bucketNamePrefix}-data-bucket`,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED
     });
 
     return {

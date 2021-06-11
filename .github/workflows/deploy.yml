@@ -31,9 +31,9 @@ jobs:
       - name: Install
         run: |
           cd quest-data-pipeline
-          npm install -g aws-cdk
+          npm install
 
       - name: Deploy
         run: |
           cd quest-data-pipeline
-          cdk deploy --parameters bucketNamePrefix=quest-data-pipeline --require-approval=never
+          npm run cdk deploy -- --parameters bucketNamePrefix=quest-data-pipeline --require-approval=never
