@@ -6,6 +6,9 @@ vendorName=$1
 vendorBucket=$2
 queueUrl=$3
 
+accountId=$(aws sts get-caller-identity | jq '.Account')
+echo "Calling script from account: $accountId"
+
 fileName=$(uuidgen).txt
 
 echo "Creating temp file: $fileName"

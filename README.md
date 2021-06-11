@@ -7,7 +7,7 @@ Contains the core data pipeline resource setup in AWS which includes Glue, SQS a
 ![Architecture](docs/ARCH.png)
 
 ### CDK Setup
-From the [data-pipeline/](data-pipeline/) directory, run the following commands:
+From the [quest-data-pipeline/](quest-data-pipeline/) directory, run the following commands:
 ```
 npm install -g cdk
 cdk deploy --parameters bucketNamePrefix=<prefix>
