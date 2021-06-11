@@ -12,7 +12,7 @@ interface S3Bucket {
   data: s3.Bucket;
 }
 
-export class GsQuestDataPipelineStack extends cdk.Stack {
+export class QuestDataPipelineStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -35,14 +35,14 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
       destinationKeyPrefix: 'scripts'
     });
 
-    const queue = new sqs.Queue(this, 'GsQuestDataPipelineQueue', {
+    const queue = new sqs.Queue(this, 'QuestDataPipelineQueue', {
       fifo: true,
       contentBasedDeduplication: true
     });
 
     queue.grantConsumeMessages(glueRole)
 
-    new glue.CfnJob(this, 'GsQuestDataPipelineGlueJob', {
+    new glue.CfnJob(this, 'QuestDataPipelineGlueJob', {
       role: glueRole.roleArn,
       command: {
         name: 'pythonshell',
@@ -55,10 +55,25 @@ export class GsQuestDataPipelineStack extends cdk.Stack {
         '--data_bucket_name': s3Bucket.data.bucketName
       }
     });
+
+    new cdk.CfnOutput(this, 'queueArn', {
+      value: queue.queueArn,
+      exportName: 'quest-data-pipeline-queue-arn'
+    });
+
+    new cdk.CfnOutput(this, 'queueUrl', {
+      value: queue.queueUrl,
+      exportName: 'quest-data-pipeline-queue-url'
+    });
+
+    new cdk.CfnOutput(this, 'vendorBucketName', {
+      value: s3Bucket.vendor.bucketName,
+      exportName: 'quest-data-pipeline-vendor-bucket-name'
+    });
   }
 
   setupIAMGlueRole(): iam.Role {
-    const glueRole = new iam.Role(this, 'GsQuestDataPipelineRole', {
+    const glueRole = new iam.Role(this, 'QuestDataPipelineRole', {
       assumedBy: new iam.ServicePrincipal('glue.amazonaws.com'),
     });
 
