@@ -40,7 +40,13 @@ export class QuestDataPipelineStack extends cdk.Stack {
       contentBasedDeduplication: true
     });
 
+    const csv_queue = new sqs.Queue(this, 'QuestDataPipelineQueueCSV', {
+      fifo: true,
+      contentBasedDeduplication: true
+    });
+
     queue.grantConsumeMessages(glueRole)
+    csv_queue.grantConsumeMessages(glueRole) 
 
     new glue.CfnJob(this, 'QuestDataPipelineGlueJob', {
       role: glueRole.roleArn,
@@ -56,6 +62,21 @@ export class QuestDataPipelineStack extends cdk.Stack {
       }
     });
 
+    new glue.CfnJob(this, 'QuestDataPipelineGlueJobS3Conn', {
+      role: glueRole.roleArn,
+      command: {
+        name: 'glueetl',
+        pythonVersion: '3',
+        scriptLocation: `s3://${s3Bucket.glue.bucketName}/scripts/consumer_s3conn.py`
+      },
+      defaultArguments: {
+        '--queue_url': csv_queue.queueUrl,
+        '--vendor_bucket_name': s3Bucket.vendor.bucketName,
+        '--data_bucket_name': s3Bucket.data.bucketName,
+        '--JOB_NAME': "testJobS3Conns"
+      }
+    });
+
     new cdk.CfnOutput(this, 'queueArn', {
       value: queue.queueArn,
       exportName: 'quest-data-pipeline-queue-arn'
@@ -64,6 +85,11 @@ export class QuestDataPipelineStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'queueUrl', {
       value: queue.queueUrl,
       exportName: 'quest-data-pipeline-queue-url'
+    });
+
+    new cdk.CfnOutput(this, 'csv_queueUrl', {
+      value: csv_queue.queueUrl,
+      exportName: 'quest-data-pipeline-csv-queue-url'
     });
 
     new cdk.CfnOutput(this, 'vendorBucketName', {
