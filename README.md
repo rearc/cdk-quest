@@ -34,3 +34,9 @@ Examples are located in the [scripts/](scripts/) directory. The following comman
 ```
 sh uploadFile.sh test-vendor test-vendor-bucket https://sqs.us-east-1.amazonaws.com/1234567890/test-vendor-queue.fifo
 ```
+To see a very basic example using connectors, execute:
+```
+sh uploadCSV.sh test-vendor test-vendor-bucket $replace_with_QuestDataPipelineStack.csvqueueUrl
+```
+
+The corresponding job will connect and transform the file from .csv to .json
