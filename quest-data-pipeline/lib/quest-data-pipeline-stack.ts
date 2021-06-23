@@ -77,6 +77,27 @@ export class QuestDataPipelineStack extends cdk.Stack {
       }
     });
 
+    //TODO
+    //need to create the jar bucket
+    //need to add read permission on the jar bucket to the glue role
+    //need to add code for creating the connector and the connection referenced by the python script
+    //need to add a directory for java related stuff, along with docs for how to build the jar file for testing
+    new glue.CfnJob(this, 'minimalTest', {
+      role: glueRole.roleArn,
+      command: {
+        name: 'glueetl',
+        pythonVersion: '3',
+        scriptLocation: `s3://${s3Bucket.glue.bucketName}/scripts/minimal.py`
+      },
+      defaultArguments: {
+        '--JOB_NAME': "super_minimal",
+        '--extra-jars': "s3://minimal-csv-connector/true_minimal-3.0.jar"
+      },
+      glueVersion: '2.0',
+      numberOfWorkers: 2,
+      workerType: "Standard"
+    });
+
     new cdk.CfnOutput(this, 'queueArn', {
       value: queue.queueArn,
       exportName: 'quest-data-pipeline-queue-arn'
