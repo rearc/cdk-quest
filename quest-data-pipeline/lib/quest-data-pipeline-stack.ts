@@ -80,8 +80,6 @@ export class QuestDataPipelineStack extends cdk.Stack {
     });
 
     //TODO
-    //need to create the jar bucket
-    //need to add read permission on the jar bucket to the glue role
     //need to add code for creating the connector and the connection referenced by the python script
     //need to add a directory for java related stuff, along with docs for how to build the jar file for testing
     new glue.CfnJob(this, 'minimalTest', {
@@ -91,9 +89,11 @@ export class QuestDataPipelineStack extends cdk.Stack {
         pythonVersion: '3',
         scriptLocation: `s3://${s3Bucket.glue.bucketName}/scripts/minimal.py`
       },
+      //do we need to build this jar first before deployment?
+      //chicken and egg question
       defaultArguments: {
         '--JOB_NAME': "super_minimal",
-        '--extra-jars': "s3://minimal-csv-connector/true_minimal-3.0.jar"
+        '--extra-jars': `s3://${s3Bucket.jar.bucketName}/true_minimal-3.0.jar`
       },
       glueVersion: '2.0',
       numberOfWorkers: 2,
