@@ -10,6 +10,7 @@ interface S3Bucket {
   glue: s3.Bucket;
   vendor: s3.Bucket;
   data: s3.Bucket;
+  jar: s3.Bucket;
 }
 
 export class QuestDataPipelineStack extends cdk.Stack {
@@ -28,6 +29,7 @@ export class QuestDataPipelineStack extends cdk.Stack {
     s3Bucket.glue.grantRead(glueRole);
     s3Bucket.vendor.grantRead(glueRole);
     s3Bucket.data.grantReadWrite(glueRole);
+    s3Bucket.jar.grantRead(glueRole);
 
     new s3Deployment.BucketDeployment(this, 'DeployGlueJobFiles', {
       sources: [s3Deployment.Source.asset('./src/glue')],
@@ -155,10 +157,19 @@ export class QuestDataPipelineStack extends cdk.Stack {
       objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED
     });
 
+    const jar = new s3.Bucket(this, 'JarBucket', {
+      versioned: true,
+      bucketName: `${bucketNamePrefix}-jar-bucket`,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED
+    });
+
     return {
       glue,
       vendor,
-      data
+      data,
+      jar
     }
   }
 }
